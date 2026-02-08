@@ -176,7 +176,7 @@ export default function AdminDashboard() {
     setEditPrice('');
   };
 
-  const categories = [...new Set(menu.map((item) => item.category))];
+  const menuCategories = [...new Set(menu.map((item) => item.category))];
 
   return (
     <div className="min-h-screen rose-pattern">
