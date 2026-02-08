@@ -206,11 +206,15 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="prices" data-testid="prices-tab">
               <Edit2 className="w-4 h-4 mr-2" />
-              Manage Prices
+              Manage Menu
             </TabsTrigger>
             <TabsTrigger value="history" data-testid="history-tab">
               <Receipt className="w-4 h-4 mr-2" />
               Order History
+            </TabsTrigger>
+            <TabsTrigger value="settings" data-testid="settings-tab">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
