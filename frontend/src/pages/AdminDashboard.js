@@ -285,8 +285,11 @@ export default function AdminDashboard() {
               <Receipt className="w-4 h-4 mr-2" />
               Order History
             </TabsTrigger>
-            <TabsTrigger value="settings" data-testid="settings-tab">
-              <Settings className="w-4 h-4 mr-2" />
+            <TabsTrigger value="reservations" data-testid="reservations-tab">
+              <Users className="w-4 h-4 mr-2" />
+              Reservations
+            </TabsTrigger>
+            <TabsTrigger value="settings" data-testid="settings-tab">\n              <Settings className="w-4 h-4 mr-2" />
               Settings
             </TabsTrigger>
           </TabsList>
