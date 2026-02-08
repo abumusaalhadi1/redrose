@@ -95,17 +95,27 @@ export default function TableSelection() {
         <Card className="p-8 shadow-lg border-red-100">
           <h2 className="text-2xl font-semibold mb-6 text-gray-800">Select Table</h2>
           <div className="table-grid">
-            {TABLES.map((table) => (
-              <Button
-                key={table}
-                onClick={() => handleTableSelect(table)}
-                data-testid={`table-${table}-button`}
-                className="h-24 text-2xl font-bold bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 hover:scale-105 transition-all shadow-sm"
-                variant="outline"
-              >
-                {table}
-              </Button>
-            ))}
+            {TABLES.map((table) => {
+              const isActive = activeTables[table];
+              return (
+                <Button
+                  key={table}
+                  onClick={() => handleTableSelect(table)}
+                  data-testid={`table-${table}-button`}
+                  className={`h-24 text-2xl font-bold border-2 hover:scale-105 transition-all shadow-sm ${
+                    isActive 
+                      ? 'bg-green-50 border-green-400 text-green-700 hover:bg-green-100' 
+                      : 'bg-white border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400'
+                  }`}
+                  variant="outline"
+                >
+                  <div className="flex flex-col items-center">
+                    <span>{table}</span>
+                    {isActive && <span className="text-xs font-normal">Active</span>}
+                  </div>
+                </Button>
+              );
+            })}
           </div>
         </Card>
 
