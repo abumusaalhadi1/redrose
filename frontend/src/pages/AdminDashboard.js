@@ -73,6 +73,86 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchPrinterConfig = async () => {
+    try {
+      const response = await axios.get(`${API}/printer/config`);
+      setPrinterIP(response.data.printer_ip);
+      setPrinterPort(response.data.printer_port);
+    } catch (error) {
+      console.log('Failed to fetch printer config');
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API}/categories`);
+      setCategories(response.data.categories);
+    } catch (error) {
+      console.log('Failed to fetch categories');
+    }
+  };
+
+  const handleSavePrinterConfig = async () => {
+    try {
+      await axios.post(`${API}/printer/config`, {
+        printer_ip: printerIP,
+        printer_port: parseInt(printerPort),
+      });
+      toast.success('Printer configuration saved');
+    } catch (error) {
+      toast.error('Failed to save printer configuration');
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (!newItem.name || !newItem.price || !newItem.category) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+    try {
+      await axios.post(`${API}/menu/item`, {
+        name: newItem.name,
+        price: parseFloat(newItem.price),
+        category: newItem.category,
+        description: newItem.description,
+      });
+      toast.success('Item added successfully');
+      setShowAddItemDialog(false);
+      setNewItem({ name: '', price: '', category: '', description: '' });
+      fetchMenu();
+      fetchCategories();
+    } catch (error) {
+      toast.error('Failed to add item');
+    }
+  };
+
+  const handleDeleteItem = async (itemId) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axios.delete(`${API}/menu/${itemId}`);
+      toast.success('Item deleted');
+      fetchMenu();
+    } catch (error) {
+      toast.error('Failed to delete item');
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName) {
+      toast.error('Please enter category name');
+      return;
+    }
+    try {
+      await axios.post(`${API}/categories`, { name: newCategoryName });
+      toast.success('Category will be available when items are added');
+      setShowAddCategoryDialog(false);
+      setNewCategoryName('');
+      fetchCategories();
+    } catch (error) {
+      toast.error('Failed to add category');
+    }
+  };
+
   const handleEditPrice = (item) => {
     setEditingItem(item.id);
     setEditPrice(item.price.toString());
