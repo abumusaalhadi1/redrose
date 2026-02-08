@@ -521,6 +521,14 @@ export default function AdminDashboard() {
                           <p className="text-xs text-gray-500 mt-1">
                             {order.items.length} items
                           </p>
+                          <Button
+                            size="sm"
+                            onClick={() => handleReprintOrder(order)}
+                            className="mt-2 bg-blue-500 hover:bg-blue-600"
+                          >
+                            <Printer className="w-3 h-3 mr-1" />
+                            Reprint
+                          </Button>
                         </div>
                       </div>
                       <div className="border-t pt-3 mt-3">
