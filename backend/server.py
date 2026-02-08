@@ -240,6 +240,12 @@ async def create_order(order_create: OrderCreate):
     await db.orders.insert_one(doc)
     return order
 
+@api_router.get("/orders/active")
+async def get_active_orders():
+    """Get all active orders"""
+    orders = await db.orders.find({"status": "active"}, {"_id": 0, "id": 1, "table_number": 1}).to_list(100)
+    return orders
+
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str):
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
