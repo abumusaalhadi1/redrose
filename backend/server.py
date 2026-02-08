@@ -317,6 +317,74 @@ async def update_printer_config(config: PrinterConfig):
     )
     return {"message": "Printer configuration updated"}
 
+# Reservations
+@api_router.get("/reservations")
+async def get_reservations(date_str: Optional[str] = None):
+    """Get reservations for a specific date or all active"""
+    if date_str:
+        target_date = datetime.fromisoformat(date_str).date()
+        start_datetime = datetime.combine(target_date, datetime.min.time()).replace(tzinfo=timezone.utc)
+        end_datetime = datetime.combine(target_date, datetime.max.time()).replace(tzinfo=timezone.utc)
+        
+        reservations = await db.reservations.find({
+            "reservation_time": {
+                "$gte": start_datetime.isoformat(),
+                "$lte": end_datetime.isoformat()
+            }
+        }, {"_id": 0}).to_list(100)
+    else:
+        reservations = await db.reservations.find({"status": "active"}, {"_id": 0}).to_list(100)
+    
+    return reservations
+
+@api_router.get("/reservations/table/{table_number}")
+async def get_table_reservation(table_number: int):
+    """Get active reservation for a table"""
+    now = datetime.now(timezone.utc)
+    # Get reservation for today
+    reservation = await db.reservations.find_one({
+        "table_number": table_number,
+        "status": "active",
+        "reservation_time": {"$gte": now.isoformat()}
+    }, {"_id": 0})
+    return reservation
+
+@api_router.post("/reservations")
+async def create_reservation(reservation: ReservationCreate):
+    """Create a new reservation"""
+    new_reservation = Reservation(
+        table_number=reservation.table_number,
+        customer_name=reservation.customer_name,
+        phone=reservation.phone,
+        people_count=reservation.people_count,
+        reservation_time=datetime.fromisoformat(reservation.reservation_time),
+        notes=reservation.notes
+    )
+    doc = new_reservation.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['reservation_time'] = doc['reservation_time'].isoformat()
+    await db.reservations.insert_one(doc)
+    return new_reservation
+
+@api_router.patch("/reservations/{reservation_id}")
+async def update_reservation(reservation_id: str, status: str):
+    """Update reservation status"""
+    result = await db.reservations.update_one(
+        {"id": reservation_id},
+        {"$set": {"status": status}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "Reservation not found")
+    return {"message": "Reservation updated"}
+
+@api_router.delete("/reservations/{reservation_id}")
+async def delete_reservation(reservation_id: str):
+    """Cancel a reservation"""
+    result = await db.reservations.delete_one({"id": reservation_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Reservation not found")
+    return {"message": "Reservation cancelled"}
+
 @api_router.patch("/menu/{item_id}")
 async def update_menu_item(item_id: str, update: MenuItemUpdate):
     update_dict = {k: v for k, v in update.model_dump().items() if v is not None}
