@@ -83,6 +83,26 @@ class OrderUpdate(BaseModel):
     order_notes: Optional[str] = None
     status: Optional[str] = None
 
+class Reservation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    table_number: int
+    customer_name: str
+    phone: Optional[str] = ""
+    people_count: int
+    reservation_time: datetime
+    notes: Optional[str] = ""
+    status: str = "active"  # active, completed, cancelled
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ReservationCreate(BaseModel):
+    table_number: int
+    customer_name: str
+    phone: Optional[str] = ""
+    people_count: int
+    reservation_time: str  # ISO datetime string
+    notes: Optional[str] = ""
+
 class PrintRequest(BaseModel):
     order_id: str
     print_type: str  # "kitchen" or "bill"
