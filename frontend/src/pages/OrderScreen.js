@@ -133,6 +133,7 @@ export default function OrderScreen() {
     'Exquisite Mild Blended Dishes',
     'Balti Dishes',
     'Vegetable Main Dishes',
+    'English Dishes',
     'Vegetable Side Dishes',
     'Sundries',
     'Rice',
