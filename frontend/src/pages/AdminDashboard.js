@@ -743,6 +743,85 @@ export default function AdminDashboard() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Add Reservation Dialog */}
+        <Dialog open={showAddReservationDialog} onOpenChange={setShowAddReservationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Reservation</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="res-table">Table Number *</Label>
+                  <Select value={newReservation.table_number} onValueChange={(value) => setNewReservation({ ...newReservation, table_number: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select table" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 16, 17].map((table) => (
+                        <SelectItem key={table} value={table.toString()}>
+                          Table {table}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="res-people">People Count *</Label>
+                  <Input
+                    id="res-people"
+                    type="number"
+                    value={newReservation.people_count}
+                    onChange={(e) => setNewReservation({ ...newReservation, people_count: e.target.value })}
+                    placeholder="2"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="res-name">Customer Name *</Label>
+                <Input
+                  id="res-name"
+                  value={newReservation.customer_name}
+                  onChange={(e) => setNewReservation({ ...newReservation, customer_name: e.target.value })}
+                  placeholder="John Smith"
+                />
+              </div>
+              <div>
+                <Label htmlFor="res-phone">Phone Number</Label>
+                <Input
+                  id="res-phone"
+                  value={newReservation.phone}
+                  onChange={(e) => setNewReservation({ ...newReservation, phone: e.target.value })}
+                  placeholder="07123456789"
+                />
+              </div>
+              <div>
+                <Label htmlFor="res-time">Reservation Time *</Label>
+                <Input
+                  id="res-time"
+                  type="datetime-local"
+                  value={newReservation.reservation_time}
+                  onChange={(e) => setNewReservation({ ...newReservation, reservation_time: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="res-notes">Notes</Label>
+                <Textarea
+                  id="res-notes"
+                  value={newReservation.notes}
+                  onChange={(e) => setNewReservation({ ...newReservation, notes: e.target.value })}
+                  placeholder="Special requests..."
+                  rows={3}
+                />
+              </div>
+              <Button onClick={handleAddReservation} className="w-full bg-red-500 hover:bg-red-600">
+                Create Reservation
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </div>
   );
