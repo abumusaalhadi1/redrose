@@ -19,10 +19,15 @@ export default function TableSelection() {
   const [showDialog, setShowDialog] = useState(false);
   const [peopleCount, setPeopleCount] = useState('');
   const [activeTables, setActiveTables] = useState({});
+  const [reservedTables, setReservedTables] = useState({});
 
   useEffect(() => {
     fetchActiveTables();
-    const interval = setInterval(fetchActiveTables, 5000); // Refresh every 5 seconds
+    fetchReservations();
+    const interval = setInterval(() => {
+      fetchActiveTables();
+      fetchReservations();
+    }, 5000); // Refresh every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -36,6 +41,23 @@ export default function TableSelection() {
       setActiveTables(activeTableMap);
     } catch (error) {
       console.log('Failed to fetch active tables');
+    }
+  };
+
+  const fetchReservations = async () => {
+    try {
+      const response = await axios.get(`${API}/reservations`);
+      const reservedTableMap = {};
+      response.data.forEach(reservation => {
+        reservedTableMap[reservation.table_number] = {
+          id: reservation.id,
+          time: new Date(reservation.reservation_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          name: reservation.customer_name
+        };
+      });
+      setReservedTables(reservedTableMap);
+    } catch (error) {
+      console.log('Failed to fetch reservations');
     }
   };
 
