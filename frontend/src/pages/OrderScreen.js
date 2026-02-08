@@ -75,8 +75,25 @@ export default function OrderScreen() {
 
   useEffect(() => {
     fetchMenu();
-    checkExistingOrder();
+    if (existingOrderId) {
+      loadExistingOrder(existingOrderId);
+    } else {
+      checkExistingOrder();
+    }
   }, []);
+
+  const loadExistingOrder = async (orderId) => {
+    try {
+      const response = await axios.get(`${API}/orders/${orderId}`);
+      if (response.data) {
+        setOrderId(response.data.id);
+        setCart(response.data.items);
+        setKitchenPrinted(response.data.kitchen_printed);
+      }
+    } catch (error) {
+      toast.error('Failed to load order');
+    }
+  };
 
   const fetchMenu = async () => {
     try {
