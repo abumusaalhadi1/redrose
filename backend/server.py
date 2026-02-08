@@ -446,6 +446,90 @@ async def update_order(order_id: str, update: OrderUpdate):
     
     return {"message": "Order updated"}
 
+@api_router.post("/orders/{order_id}/add-items")
+async def add_items_to_order(order_id: str, new_items: List[OrderItem]):
+    """Add items to existing order (for modifications after initial order)"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(404, "Order not found")
+    
+    # Append new items to existing items
+    current_items = order.get('items', [])
+    current_items.extend([item.model_dump() for item in new_items])
+    
+    result = await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"items": current_items}}
+    )
+    
+    return {"message": "Items added to order", "total_items": len(current_items)}
+
+@api_router.post("/orders/{order_id}/send-additional-kitchen")
+async def send_additional_to_kitchen(order_id: str, item_indices: List[int]):
+    """Send specific new items to kitchen (for order modifications)"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(404, "Order not found")
+    
+    # Get printer configuration
+    printer_config = await db.settings.find_one({"type": "printer"}, {"_id": 0})
+    if printer_config:
+        PRINTER_IP = printer_config.get("printer_ip", "192.168.1.146")
+        PRINTER_PORT = printer_config.get("printer_port", 9100)
+    else:
+        PRINTER_IP = "192.168.1.146"
+        PRINTER_PORT = 9100
+    
+    try:
+        # ESC/POS commands
+        ESC = b'\\x1B'
+        GS = b'\\x1D'
+        
+        # Initialize printer
+        printer_data = ESC + b'@'
+        
+        # Additional items ticket
+        printer_data += ESC + b'!\\x30'  # Double height and width
+        printer_data += b'ADDITIONAL ITEMS\\n'
+        printer_data += ESC + b'!\\x00'  # Normal
+        printer_data += b'=' * 32 + b'\\n'
+        printer_data += f"TABLE: {order['table_number']}\\n".encode()
+        printer_data += b'=' * 32 + b'\\n\\n'
+        
+        for idx in item_indices:
+            if idx < len(order['items']):
+                item = order['items'][idx]
+                # Skip drinks
+                if 'drink' in item['name'].lower() or 'coke' in item['name'].lower() or 'beer' in item['name'].lower():
+                    continue
+                
+                qty_name = f"{item['quantity']} x {item['name']}\\n"
+                printer_data += qty_name.encode()
+                
+                if item.get('notes'):
+                    printer_data += ESC + b'!\\x01'  # Italic
+                    printer_data += f"  *{item['notes']}*\\n".encode()
+                    printer_data += ESC + b'!\\x00'  # Normal
+        
+        # Cut paper
+        printer_data += b'\\n' + GS + b'V\\x00'
+        
+        # Send to printer
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)
+        sock.connect((PRINTER_IP, PRINTER_PORT))
+        sock.sendall(printer_data)
+        sock.close()
+        
+        return {
+            "message": "Additional items sent to kitchen",
+            "printer": f"{PRINTER_IP}:{PRINTER_PORT}"
+        }
+    
+    except Exception as e:
+        logging.error(f"Print error: {str(e)}")
+        raise HTTPException(500, f"Print failed: {str(e)}")
+
 @api_router.post("/orders/{order_id}/complete")
 async def complete_order(order_id: str):
     result = await db.orders.update_one(
