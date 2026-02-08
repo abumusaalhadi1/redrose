@@ -119,6 +119,7 @@ export default function TableSelection() {
           <div className="table-grid">
             {TABLES.map((table) => {
               const isActive = activeTables[table];
+              const isReserved = reservedTables[table];
               return (
                 <Button
                   key={table}
@@ -127,6 +128,8 @@ export default function TableSelection() {
                   className={`h-24 text-2xl font-bold border-2 hover:scale-105 transition-all shadow-sm ${
                     isActive 
                       ? 'bg-green-50 border-green-400 text-green-700 hover:bg-green-100' 
+                      : isReserved
+                      ? 'bg-blue-50 border-blue-400 text-blue-700 hover:bg-blue-100'
                       : 'bg-white border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400'
                   }`}
                   variant="outline"
@@ -134,6 +137,9 @@ export default function TableSelection() {
                   <div className="flex flex-col items-center">
                     <span>{table}</span>
                     {isActive && <span className="text-xs font-normal">Active</span>}
+                    {isReserved && !isActive && (
+                      <span className="text-xs font-normal">{isReserved.time}</span>
+                    )}
                   </div>
                 </Button>
               );
