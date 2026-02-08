@@ -272,7 +272,7 @@ export default function AdminDashboard() {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="summary" className="w-full">
-          <TabsList className="bg-white border border-red-100 mb-6" data-testid="admin-tabs">
+          <TabsList className="w-full bg-white border border-red-100 mb-6 flex-wrap h-auto p-2 gap-2" data-testid="admin-tabs">
             <TabsTrigger value="summary" data-testid="summary-tab">
               <TrendingUp className="w-4 h-4 mr-2" />
               Daily Summary
@@ -289,7 +289,8 @@ export default function AdminDashboard() {
               <Users className="w-4 h-4 mr-2" />
               Reservations
             </TabsTrigger>
-            <TabsTrigger value="settings" data-testid="settings-tab">\n              <Settings className="w-4 h-4 mr-2" />
+            <TabsTrigger value="settings" data-testid="settings-tab">
+              <Settings className="w-4 h-4 mr-2" />
               Settings
             </TabsTrigger>
           </TabsList>
