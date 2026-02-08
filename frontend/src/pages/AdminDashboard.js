@@ -164,6 +164,68 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchReservations = async () => {
+    try {
+      const response = await axios.get(`${API}/reservations`);
+      setReservations(response.data);
+    } catch (error) {
+      console.log('Failed to fetch reservations');
+    }
+  };
+
+  const handleAddReservation = async () => {
+    if (!newReservation.table_number || !newReservation.customer_name || !newReservation.reservation_time) {
+      toast.error('Please fill required fields');
+      return;
+    }
+    try {
+      await axios.post(`${API}/reservations`, {
+        table_number: parseInt(newReservation.table_number),
+        customer_name: newReservation.customer_name,
+        phone: newReservation.phone,
+        people_count: parseInt(newReservation.people_count) || 2,
+        reservation_time: new Date(newReservation.reservation_time).toISOString(),
+        notes: newReservation.notes
+      });
+      toast.success('Reservation created');
+      setShowAddReservationDialog(false);
+      setNewReservation({
+        table_number: '',
+        customer_name: '',
+        phone: '',
+        people_count: '',
+        reservation_time: '',
+        notes: ''
+      });
+      fetchReservations();
+    } catch (error) {
+      toast.error('Failed to create reservation');
+    }
+  };
+
+  const handleCancelReservation = async (reservationId) => {
+    if (!window.confirm('Cancel this reservation?')) return;
+    try {
+      await axios.delete(`${API}/reservations/${reservationId}`);
+      toast.success('Reservation cancelled');
+      fetchReservations();
+    } catch (error) {
+      toast.error('Failed to cancel reservation');
+    }
+  };
+
+  const handleReprintOrder = async (order) => {
+    try {
+      await axios.post(`${API}/print`, {
+        order_id: order.id,
+        print_type: 'bill'
+      });
+      toast.success('Bill reprinted (2 copies)');
+    } catch (error) {
+      toast.error('Failed to reprint bill');
+    }
+  };
+
   const handleEditPrice = (item) => {
     setEditingItem(item.id);
     setEditPrice(item.price.toString());
