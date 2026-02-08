@@ -33,6 +33,16 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [showAddReservationDialog, setShowAddReservationDialog] = useState(false);
+  const [newReservation, setNewReservation] = useState({
+    table_number: '',
+    customer_name: '',
+    phone: '',
+    people_count: '',
+    reservation_time: '',
+    notes: ''
+  });
+  const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
     fetchMenu();
@@ -40,6 +50,7 @@ export default function AdminDashboard() {
     fetchDailySummary();
     fetchPrinterConfig();
     fetchCategories();
+    fetchReservations();
   }, []);
 
   useEffect(() => {
