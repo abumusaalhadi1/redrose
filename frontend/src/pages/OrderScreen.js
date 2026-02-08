@@ -764,6 +764,15 @@ export default function OrderScreen() {
                 Complete
               </Button>
             </div>
+            {orderId && (
+              <Button
+                onClick={handleCloseTable}
+                variant="outline"
+                className="w-full mt-2 border-red-500 text-red-600 hover:bg-red-50"
+              >
+                Close Table & Finish Order
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
