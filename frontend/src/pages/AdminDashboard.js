@@ -470,7 +470,138 @@ export default function AdminDashboard() {
               </ScrollArea>
             </Card>
           </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="space-y-6">
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <Printer className="w-6 h-6 text-red-600" />
+                  <h2 className="text-xl font-semibold">Printer Configuration</h2>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">
+                  Update printer IP address when it changes. Both the app and printer should be on the same WiFi network.
+                </p>
+                <div className="space-y-4 max-w-md">
+                  <div>
+                    <Label htmlFor="printer-ip" className="mb-2 block">
+                      Printer IP Address
+                    </Label>
+                    <Input
+                      id="printer-ip"
+                      placeholder="192.168.1.146"
+                      value={printerIP}
+                      onChange={(e) => setPrinterIP(e.target.value)}
+                      data-testid="printer-ip-input"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="printer-port" className="mb-2 block">
+                      Printer Port
+                    </Label>
+                    <Input
+                      id="printer-port"
+                      type="number"
+                      placeholder="9100"
+                      value={printerPort}
+                      onChange={(e) => setPrinterPort(e.target.value)}
+                      data-testid="printer-port-input"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleSavePrinterConfig}
+                    data-testid="save-printer-config"
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Save Printer Configuration
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
+
+        {/* Add Item Dialog */}
+        <Dialog open={showAddItemDialog} onOpenChange={setShowAddItemDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Menu Item</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="item-name">Item Name *</Label>
+                <Input
+                  id="item-name"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                  placeholder="e.g., Chicken Tikka Masala"
+                />
+              </div>
+              <div>
+                <Label htmlFor="item-price">Price (£) *</Label>
+                <Input
+                  id="item-price"
+                  type="number"
+                  step="0.01"
+                  value={newItem.price}
+                  onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                  placeholder="9.95"
+                />
+              </div>
+              <div>
+                <Label htmlFor="item-category">Category *</Label>
+                <Select value={newItem.category} onValueChange={(value) => setNewItem({ ...newItem, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="item-description">Description</Label>
+                <Textarea
+                  id="item-description"
+                  value={newItem.description}
+                  onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                  placeholder="Optional description"
+                  rows={3}
+                />
+              </div>
+              <Button onClick={handleAddItem} className="w-full bg-red-500 hover:bg-red-600">
+                Add Item
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Category Dialog */}
+        <Dialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="category-name">Category Name</Label>
+                <Input
+                  id="category-name"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="e.g., Chef Specials"
+                />
+              </div>
+              <Button onClick={handleAddCategory} className="w-full bg-red-500 hover:bg-red-600">
+                Add Category
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
