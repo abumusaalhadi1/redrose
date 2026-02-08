@@ -117,15 +117,21 @@ export default function OrderScreen() {
 
   const categories = [...new Set(menu.map((item) => item.category))];
   const categoryOrder = [
+    'Soft Drinks',
+    'Beers',
     'Set Meals',
     'Starters',
     'Tandoori Main Dishes',
     'Biryani',
     'Traditional Curries',
+    'Red Rose Chef\'s Specialities',
+    'Exquisite Mild Blended Dishes',
+    'Balti Dishes',
+    'Vegetable Main Dishes',
+    'Vegetable Side Dishes',
+    'Sundries',
     'Rice',
     'Naan Breads',
-    'Soft Drinks',
-    'Beers',
   ];
   const sortedCategories = categories.sort(
     (a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
