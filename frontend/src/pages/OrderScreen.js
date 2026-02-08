@@ -118,7 +118,6 @@ export default function OrderScreen() {
   const categories = [...new Set(menu.map((item) => item.category))];
   const categoryOrder = [
     'Set Meals',
-    'Extras',
     'Starters',
     'Tandoori Main Dishes',
     'Biryani',
