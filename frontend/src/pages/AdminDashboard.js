@@ -388,6 +388,14 @@ export default function AdminDashboard() {
                                     >
                                       <Edit2 className="w-4 h-4" />
                                     </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleDeleteItem(item.id)}
+                                      className="border-red-200 text-red-600 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
                                   </>
                                 )}
                               </div>
