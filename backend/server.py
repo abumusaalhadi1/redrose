@@ -375,6 +375,15 @@ async def print_ticket(request: PrintRequest):
     if not order:
         raise HTTPException(404, "Order not found")
     
+    # Get printer configuration
+    printer_config = await db.settings.find_one({"type": "printer"}, {"_id": 0})
+    if printer_config:
+        PRINTER_IP = printer_config.get("printer_ip", "192.168.1.146")
+        PRINTER_PORT = printer_config.get("printer_port", 9100)
+    else:
+        PRINTER_IP = "192.168.1.146"
+        PRINTER_PORT = 9100
+    
     try:
         # ESC/POS commands
         ESC = b'\x1B'
