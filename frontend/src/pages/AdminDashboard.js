@@ -26,11 +26,20 @@ export default function AdminDashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [editingItem, setEditingItem] = useState(null);
   const [editPrice, setEditPrice] = useState('');
+  const [printerIP, setPrinterIP] = useState('192.168.1.146');
+  const [printerPort, setPrinterPort] = useState(9100);
+  const [showAddItemDialog, setShowAddItemDialog] = useState(false);
+  const [newItem, setNewItem] = useState({ name: '', price: '', category: '', description: '' });
+  const [categories, setCategories] = useState([]);
+  const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   useEffect(() => {
     fetchMenu();
     fetchHistory();
     fetchDailySummary();
+    fetchPrinterConfig();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
