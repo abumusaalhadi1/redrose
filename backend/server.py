@@ -31,9 +31,25 @@ class MenuItem(BaseModel):
     description: Optional[str] = ""
     available: bool = True
 
+class MenuItemCreate(BaseModel):
+    name: str
+    price: float
+    category: str
+    description: Optional[str] = ""
+
 class MenuItemUpdate(BaseModel):
+    name: Optional[str] = None
     price: Optional[float] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
     available: Optional[bool] = None
+
+class PrinterConfig(BaseModel):
+    printer_ip: str
+    printer_port: int = 9100
+
+class CategoryCreate(BaseModel):
+    name: str
 
 class OrderItem(BaseModel):
     menu_item_id: str
