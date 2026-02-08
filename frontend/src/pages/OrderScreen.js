@@ -295,22 +295,40 @@ export default function OrderScreen() {
       let currentOrderId = orderId;
 
       if (!currentOrderId) {
+        // Create new order
         const response = await axios.post(`${API}/orders`, {
           table_number: parseInt(tableNumber),
           people_count: peopleCount,
-          bill_type: 'one',
           items: cart,
           order_notes: '',
         });
         currentOrderId = response.data.id;
-        setOrderId(currentOrderId);
+      } else {
+        // Update existing order
+        await axios.patch(`${API}/orders/${currentOrderId}`, {
+          items: cart,
+        });
       }
 
-      await axios.post(`${API}/orders/${currentOrderId}/complete`);
-      toast.success('Order completed!');
-      setTimeout(() => navigate('/'), 1500);
+      toast.success('Order saved!');
+      setTimeout(() => navigate('/'), 1000);
     } catch (error) {
-      toast.error('Failed to complete order');
+      toast.error('Failed to save order');
+    }
+  };
+
+  const handleCloseTable = async () => {
+    if (!orderId) {
+      toast.error('No active order');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/orders/${orderId}/complete`);
+      toast.success('Table closed!');
+      setTimeout(() => navigate('/'), 1000);
+    } catch (error) {
+      toast.error('Failed to close table');
     }
   };
 
