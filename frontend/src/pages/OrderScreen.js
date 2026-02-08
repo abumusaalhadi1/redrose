@@ -26,10 +26,14 @@ const CATEGORY_ORDER = {
   'Tandoori Main Dishes': 3,
   'Biryani': 3,
   'Traditional Curries': 3,
+  'Red Rose Chef\'s Specialities': 3,
+  'Exquisite Mild Blended Dishes': 3,
+  'Balti Dishes': 3,
   'Vegetable Main Dishes': 4,
   'Vegetable Side Dishes': 4,
-  'Rice': 5,
-  'Naan Breads': 6,
+  'Sundries': 5,
+  'Rice': 6,
+  'Naan Breads': 7,
   'Set Meals': 0
 };
 
@@ -39,8 +43,9 @@ const CATEGORY_DISPLAY_NAMES = {
   2: 'Drinks',
   3: 'Main Dishes',
   4: 'Side Dishes',
-  5: 'Rice',
-  6: 'Naan Breads'
+  5: 'Sundries',
+  6: 'Rice',
+  7: 'Naan Breads'
 };
 
 // Curry type subcategories
