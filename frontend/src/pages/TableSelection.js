@@ -14,10 +14,39 @@ export default function TableSelection() {
   const [selectedTable, setSelectedTable] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [peopleCount, setPeopleCount] = useState('');
+  const [activeTables, setActiveTables] = useState({});
 
-  const handleTableSelect = (tableNum) => {
-    setSelectedTable(tableNum);
-    setShowDialog(true);
+  useEffect(() => {
+    fetchActiveTables();
+    const interval = setInterval(fetchActiveTables, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchActiveTables = async () => {
+    try {
+      const response = await axios.get(`${API}/orders/active`);
+      const activeTableMap = {};
+      response.data.forEach(order => {
+        activeTableMap[order.table_number] = order.id;
+      });
+      setActiveTables(activeTableMap);
+    } catch (error) {
+      console.log('Failed to fetch active tables');
+    }
+  };
+
+  const handleTableSelect = async (tableNum) => {
+    // Check if table has active order
+    if (activeTables[tableNum]) {
+      // Navigate directly to existing order
+      navigate(`/order/${tableNum}`, {
+        state: { existingOrderId: activeTables[tableNum] }
+      });
+    } else {
+      // Show people count dialog for new order
+      setSelectedTable(tableNum);
+      setShowDialog(true);
+    }
   };
 
   const handleContinue = () => {
