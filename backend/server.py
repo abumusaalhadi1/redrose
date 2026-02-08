@@ -465,16 +465,17 @@ async def print_ticket(request: PrintRequest):
         printer_data += GS + b'V\x00'
         
         # Send to printer
-        PRINTER_IP = "192.168.1.146"
-        PRINTER_PORT = 9100
-        
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(5)
         sock.connect((PRINTER_IP, PRINTER_PORT))
         sock.sendall(printer_data)
         sock.close()
         
-        return {"message": f"Print sent successfully", "type": request.print_type}
+        return {
+            "message": f"Print sent successfully", 
+            "type": request.print_type,
+            "printer": f"{PRINTER_IP}:{PRINTER_PORT}"
+        }
     
     except Exception as e:
         logging.error(f"Print error: {str(e)}")
