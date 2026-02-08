@@ -99,24 +99,6 @@ export default function TableSelection() {
                 />
               </div>
 
-              <div>
-                <Label className="text-base mb-3 block">Bill Type</Label>
-                <RadioGroup value={billType} onValueChange={setBillType} data-testid="bill-type-radio">
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                    <RadioGroupItem value="one" id="one-bill" data-testid="one-bill-radio" />
-                    <Label htmlFor="one-bill" className="flex-1 cursor-pointer">
-                      One Bill
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                    <RadioGroupItem value="split" id="split-bill" data-testid="split-bill-radio" />
-                    <Label htmlFor="split-bill" className="flex-1 cursor-pointer">
-                      Split Bill
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
               <Button
                 onClick={handleContinue}
                 disabled={!peopleCount || parseInt(peopleCount) < 1}
