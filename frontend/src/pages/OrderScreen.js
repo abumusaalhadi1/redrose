@@ -20,29 +20,27 @@ const API = `${BACKEND_URL}/api`;
 
 // Order display categories
 const CATEGORY_ORDER = {
-  'Extras': 1,
+  'Starters': 1,
   'Soft Drinks': 2,
   'Beers': 2,
-  'Starters': 3,
-  'Tandoori Main Dishes': 4,
-  'Biryani': 4,
-  'Traditional Curries': 4,
-  'Vegetable Main Dishes': 5,
-  'Vegetable Side Dishes': 5,
-  'Rice': 6,
-  'Naan Breads': 7,
+  'Tandoori Main Dishes': 3,
+  'Biryani': 3,
+  'Traditional Curries': 3,
+  'Vegetable Main Dishes': 4,
+  'Vegetable Side Dishes': 4,
+  'Rice': 5,
+  'Naan Breads': 6,
   'Set Meals': 0
 };
 
 const CATEGORY_DISPLAY_NAMES = {
-  1: 'Papadams + Chutneys',
+  0: 'Set Meals',
+  1: 'Starters (including Papadams)',
   2: 'Drinks',
-  3: 'Starters',
-  4: 'Main Dishes',
-  5: 'Side Dishes',
-  6: 'Rice',
-  7: 'Naan Breads',
-  0: 'Set Meals'
+  3: 'Main Dishes',
+  4: 'Side Dishes',
+  5: 'Rice',
+  6: 'Naan Breads'
 };
 
 // Curry type subcategories
