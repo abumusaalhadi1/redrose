@@ -236,6 +236,67 @@ async def get_menu():
     menu = await db.menu.find({}, {"_id": 0}).to_list(1000)
     return menu
 
+@api_router.post("/menu/item")
+async def create_menu_item(item: MenuItemCreate):
+    item_id = item.name.lower().replace(' ', '_').replace('(', '').replace(')', '')
+    new_item = {
+        "id": item_id,
+        "name": item.name,
+        "price": item.price,
+        "category": item.category,
+        "description": item.description,
+        "available": True
+    }
+    await db.menu.insert_one(new_item)
+    return {"message": "Menu item created", "id": item_id}
+
+@api_router.patch("/menu/{item_id}")
+async def update_menu_item(item_id: str, update: MenuItemUpdate):
+    update_dict = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_dict:
+        raise HTTPException(400, "No fields to update")
+    
+    result = await db.menu.update_one({"id": item_id}, {"$set": update_dict})
+    if result.matched_count == 0:
+        raise HTTPException(404, "Menu item not found")
+    
+    return {"message": "Menu item updated"}
+
+@api_router.delete("/menu/{item_id}")
+async def delete_menu_item(item_id: str):
+    result = await db.menu.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Menu item not found")
+    return {"message": "Menu item deleted"}
+
+@api_router.get("/categories")
+async def get_categories():
+    categories = await db.menu.distinct("category")
+    return {"categories": sorted(categories)}
+
+@api_router.post("/categories")
+async def create_category(category: CategoryCreate):
+    # Just return success - categories are created automatically when items are added
+    return {"message": "Category will be created when items are added", "name": category.name}
+
+# Printer Configuration
+@api_router.get("/printer/config")
+async def get_printer_config():
+    config = await db.settings.find_one({"type": "printer"}, {"_id": 0})
+    if not config:
+        # Return default
+        return {"printer_ip": "192.168.1.146", "printer_port": 9100}
+    return {"printer_ip": config.get("printer_ip"), "printer_port": config.get("printer_port", 9100)}
+
+@api_router.post("/printer/config")
+async def update_printer_config(config: PrinterConfig):
+    await db.settings.update_one(
+        {"type": "printer"},
+        {"$set": {"printer_ip": config.printer_ip, "printer_port": config.printer_port}},
+        upsert=True
+    )
+    return {"message": "Printer configuration updated"}
+
 @api_router.patch("/menu/{item_id}")
 async def update_menu_item(item_id: str, update: MenuItemUpdate):
     update_dict = {k: v for k, v in update.model_dump().items() if v is not None}
