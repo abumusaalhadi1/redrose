@@ -5,7 +5,6 @@ import { Card } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Flower2 } from 'lucide-react';
 
 const TABLES = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 16, 17];
@@ -15,7 +14,6 @@ export default function TableSelection() {
   const [selectedTable, setSelectedTable] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [peopleCount, setPeopleCount] = useState('');
-  const [billType, setBillType] = useState('one');
 
   const handleTableSelect = (tableNum) => {
     setSelectedTable(tableNum);
@@ -25,7 +23,7 @@ export default function TableSelection() {
   const handleContinue = () => {
     if (peopleCount && parseInt(peopleCount) > 0) {
       navigate(`/order/${selectedTable}`, {
-        state: { peopleCount: parseInt(peopleCount), billType }
+        state: { peopleCount: parseInt(peopleCount) }
       });
     }
   };
