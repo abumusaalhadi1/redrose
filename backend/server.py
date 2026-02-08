@@ -48,7 +48,6 @@ class Order(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     table_number: int
     people_count: int
-    bill_type: str  # "one" or "split"
     items: List[OrderItem]
     order_notes: Optional[str] = ""
     status: str = "active"  # active, completed
@@ -60,7 +59,6 @@ class Order(BaseModel):
 class OrderCreate(BaseModel):
     table_number: int
     people_count: int
-    bill_type: str
     items: List[OrderItem]
     order_notes: Optional[str] = ""
 
