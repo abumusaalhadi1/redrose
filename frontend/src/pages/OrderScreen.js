@@ -11,17 +11,52 @@ import { Textarea } from '../components/ui/textarea';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { toast } from 'sonner';
-import { ShoppingCart, Plus, Minus, Printer, ChefHat, Receipt, Calculator, ArrowLeft, Trash2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Printer, ChefHat, Calculator, ArrowLeft, Trash2, Search, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Order display categories
+const CATEGORY_ORDER = {
+  'Extras': 1,
+  'Soft Drinks': 2,
+  'Beers': 2,
+  'Starters': 3,
+  'Tandoori Main Dishes': 4,
+  'Biryani': 4,
+  'Traditional Curries': 4,
+  'Vegetable Main Dishes': 5,
+  'Vegetable Side Dishes': 5,
+  'Rice': 6,
+  'Naan Breads': 7,
+  'Set Meals': 0
+};
+
+const CATEGORY_DISPLAY_NAMES = {
+  1: 'Papadams + Chutneys',
+  2: 'Drinks',
+  3: 'Starters',
+  4: 'Main Dishes',
+  5: 'Side Dishes',
+  6: 'Rice',
+  7: 'Naan Breads',
+  0: 'Set Meals'
+};
+
+// Curry type subcategories
+const CURRY_TYPES = [
+  'Korma', 'Madras', 'Vindaloo', 'Jalfrezi', 'Bhuna', 'Rogan Josh', 
+  'Pathia', 'Dansak', 'Dupiaza', 'Karahi', 'Malaya', 'Kashmir', 
+  'Jeerajal', 'Ceylon', 'Sagwala', 'Noorangi', 'Garlic Chilli'
+];
 
 export default function OrderScreen() {
   const { tableNumber } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { peopleCount, billType } = location.state || { peopleCount: 1, billType: 'one' };
+  const { peopleCount } = location.state || { peopleCount: 1 };
 
   const [menu, setMenu] = useState([]);
   const [cart, setCart] = useState([]);
@@ -35,6 +70,8 @@ export default function OrderScreen() {
   const [showSplitDialog, setShowSplitDialog] = useState(false);
   const [selectedItemsForSplit, setSelectedItemsForSplit] = useState([]);
   const [splitTotal, setSplitTotal] = useState({ selected: 0, remaining: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDrinksDetail, setShowDrinksDetail] = useState(false);
 
   useEffect(() => {
     fetchMenu();
@@ -66,6 +103,7 @@ export default function OrderScreen() {
   const categories = [...new Set(menu.map((item) => item.category))];
   const categoryOrder = [
     'Set Meals',
+    'Extras',
     'Starters',
     'Tandoori Main Dishes',
     'Biryani',
@@ -93,6 +131,7 @@ export default function OrderScreen() {
       quantity: itemQuantity,
       price: selectedItem.price,
       notes: itemNotes,
+      category: selectedItem.category,
     };
     setCart([...cart, orderItem]);
     setShowItemDialog(false);
@@ -115,6 +154,32 @@ export default function OrderScreen() {
     return cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
   };
 
+  // Group cart items by display category
+  const getGroupedCartItems = () => {
+    const grouped = {};
+    cart.forEach(item => {
+      const orderNum = CATEGORY_ORDER[item.category] || 8;
+      if (!grouped[orderNum]) {
+        grouped[orderNum] = [];
+      }
+      grouped[orderNum].push(item);
+    });
+    return grouped;
+  };
+
+  const getDrinksTotal = () => {
+    const drinks = cart.filter(item => 
+      item.category === 'Soft Drinks' || item.category === 'Beers'
+    );
+    return drinks.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  };
+
+  const getDrinksItems = () => {
+    return cart.filter(item => 
+      item.category === 'Soft Drinks' || item.category === 'Beers'
+    );
+  };
+
   const handleSendToKitchen = async () => {
     if (cart.length === 0) {
       toast.error('Add items to order first');
@@ -133,7 +198,7 @@ export default function OrderScreen() {
         const response = await axios.post(`${API}/orders`, {
           table_number: parseInt(tableNumber),
           people_count: peopleCount,
-          bill_type: billType,
+          bill_type: 'one',
           items: cart,
           order_notes: '',
         });
@@ -171,7 +236,7 @@ export default function OrderScreen() {
         const response = await axios.post(`${API}/orders`, {
           table_number: parseInt(tableNumber),
           people_count: peopleCount,
-          bill_type: billType,
+          bill_type: 'one',
           items: cart,
           order_notes: '',
         });
@@ -196,13 +261,27 @@ export default function OrderScreen() {
   };
 
   const handleCompleteOrder = async () => {
-    if (!orderId) {
-      toast.error('No active order');
+    if (cart.length === 0) {
+      toast.error('No items in order');
       return;
     }
 
     try {
-      await axios.post(`${API}/orders/${orderId}/complete`);
+      let currentOrderId = orderId;
+
+      if (!currentOrderId) {
+        const response = await axios.post(`${API}/orders`, {
+          table_number: parseInt(tableNumber),
+          people_count: peopleCount,
+          bill_type: 'one',
+          items: cart,
+          order_notes: '',
+        });
+        currentOrderId = response.data.id;
+        setOrderId(currentOrderId);
+      }
+
+      await axios.post(`${API}/orders/${currentOrderId}/complete`);
       toast.success('Order completed!');
       setTimeout(() => navigate('/'), 1500);
     } catch (error) {
@@ -235,6 +314,25 @@ export default function OrderScreen() {
     setSplitTotal({ selected, remaining });
   };
 
+  // Get curry types from Traditional Curries category
+  const getCurryTypeItems = (curryType) => {
+    return menu.filter(item => 
+      item.category === 'Traditional Curries' && 
+      item.name.includes(curryType) &&
+      item.available &&
+      (searchQuery === '' || item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  };
+
+  // Filter menu items by search
+  const getFilteredMenuItems = (category) => {
+    return menu.filter(item => 
+      item.category === category && 
+      item.available &&
+      (searchQuery === '' || item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  };
+
   return (
     <div className="min-h-screen rose-pattern">
       {/* Header */}
@@ -254,7 +352,7 @@ export default function OrderScreen() {
                 Table {tableNumber}
               </h1>
               <p className="text-sm text-gray-500">
-                {peopleCount} {peopleCount === 1 ? 'Person' : 'People'} • {billType === 'one' ? 'One Bill' : 'Split Bill'}
+                {peopleCount} {peopleCount === 1 ? 'Person' : 'People'}
               </p>
             </div>
           </div>
@@ -271,6 +369,19 @@ export default function OrderScreen() {
 
       {/* Menu */}
       <div className="max-w-7xl mx-auto p-4">
+        {/* Search Bar */}
+        <Card className="p-4 mb-4">
+          <div className="flex items-center gap-2">
+            <Search className="w-5 h-5 text-gray-400" />
+            <Input
+              placeholder="Search menu items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+        </Card>
+
         <Tabs defaultValue={sortedCategories[0]} className="w-full">
           <TabsList className="w-full flex-wrap h-auto bg-white border border-red-100 p-2 gap-2" data-testid="category-tabs">
             {sortedCategories.map((category) => (
@@ -287,10 +398,52 @@ export default function OrderScreen() {
 
           {sortedCategories.map((category) => (
             <TabsContent key={category} value={category} className="mt-6">
-              <div className="menu-grid">
-                {menu
-                  .filter((item) => item.category === category && item.available)
-                  .map((item) => (
+              {category === 'Traditional Curries' ? (
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                  {CURRY_TYPES.map(curryType => {
+                    const items = getCurryTypeItems(curryType);
+                    if (items.length === 0) return null;
+                    return (
+                      <AccordionItem key={curryType} value={curryType} className="border rounded-lg px-4 bg-white">
+                        <AccordionTrigger className="text-lg font-semibold text-gray-900 hover:no-underline">
+                          {curryType} <Badge className="ml-2 bg-red-100 text-red-600">{items.length}</Badge>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="menu-grid pt-4">
+                            {items.map((item) => (
+                              <Card
+                                key={item.id}
+                                data-testid={`menu-item-${item.id}`}
+                                className="p-4 hover:shadow-lg transition-shadow border-red-100"
+                              >
+                                <div className="flex justify-between items-start mb-3">
+                                  <div className="flex-1">
+                                    <h3 className="font-semibold text-lg text-gray-900">{item.name}</h3>
+                                    {item.description && (
+                                      <p className="text-sm text-gray-500 mt-1">{item.description}</p>
+                                    )}
+                                  </div>
+                                  <Badge className="ml-2 bg-red-500">£{item.price.toFixed(2)}</Badge>
+                                </div>
+                                <Button
+                                  onClick={() => handleAddToCart(item)}
+                                  data-testid={`add-item-${item.id}`}
+                                  className="w-full bg-red-500 hover:bg-red-600"
+                                >
+                                  <Plus className="w-4 h-4 mr-2" />
+                                  Add to Order
+                                </Button>
+                              </Card>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              ) : (
+                <div className="menu-grid">
+                  {getFilteredMenuItems(category).map((item) => (
                     <Card
                       key={item.id}
                       data-testid={`menu-item-${item.id}`}
@@ -315,7 +468,8 @@ export default function OrderScreen() {
                       </Button>
                     </Card>
                   ))}
-              </div>
+                </div>
+              )}
             </TabsContent>
           ))}
         </Tabs>
@@ -379,58 +533,146 @@ export default function OrderScreen() {
       <Dialog open={showCartDialog} onOpenChange={setShowCartDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh]" data-testid="cart-dialog">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Current Order</DialogTitle>
+            <DialogTitle className="text-2xl">Current Order - Table {tableNumber}</DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-[400px] pr-4">
             {cart.length === 0 ? (
               <div className="text-center py-12 text-gray-500">No items in cart</div>
             ) : (
-              <div className="space-y-3">
-                {cart.map((item, index) => (
-                  <Card key={index} data-testid={`cart-item-${index}`} className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                        {item.notes && <p className="text-sm text-gray-500 italic mt-1">{item.notes}</p>}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeCartItem(index)}
-                        data-testid={`remove-item-${index}`}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+              <div className="space-y-4">
+                {Object.keys(CATEGORY_DISPLAY_NAMES).sort((a, b) => parseInt(a) - parseInt(b)).map(orderNum => {
+                  const groupedItems = getGroupedCartItems();
+                  if (!groupedItems[orderNum] || groupedItems[orderNum].length === 0) return null;
+                  
+                  const categoryName = CATEGORY_DISPLAY_NAMES[orderNum];
+                  
+                  // Special handling for drinks
+                  if (orderNum === '2') {
+                    const drinksTotal = getDrinksTotal();
+                    const drinkItems = getDrinksItems();
+                    if (drinkItems.length === 0) return null;
+                    
+                    return (
+                      <div key={orderNum} className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-lg text-gray-900">{categoryName}</h3>
+                          <span className="font-bold text-red-600">£{drinksTotal.toFixed(2)}</span>
+                        </div>
                         <Button
                           variant="outline"
-                          size="sm"
-                          onClick={() => updateCartItemQuantity(index, -1)}
-                          data-testid={`decrease-cart-item-${index}`}
+                          onClick={() => setShowDrinksDetail(!showDrinksDetail)}
+                          className="w-full mb-2 border-red-200"
                         >
-                          <Minus className="w-3 h-3" />
+                          {showDrinksDetail ? 'Hide' : 'View'} Details <ChevronDown className="w-4 h-4 ml-2" />
                         </Button>
-                        <span className="font-semibold w-8 text-center" data-testid={`cart-item-quantity-${index}`}>
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => updateCartItemQuantity(index, 1)}
-                          data-testid={`increase-cart-item-${index}`}
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
+                        {showDrinksDetail && (
+                          <div className="space-y-2 pl-4">
+                            {drinkItems.map((item, index) => {
+                              const actualIndex = cart.indexOf(item);
+                              return (
+                                <Card key={actualIndex} className="p-3">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div className="flex-1">
+                                      <h4 className="font-semibold text-sm text-gray-900">{item.name}</h4>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeCartItem(actualIndex)}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => updateCartItemQuantity(actualIndex, -1)}
+                                      >
+                                        <Minus className="w-3 h-3" />
+                                      </Button>
+                                      <span className="font-semibold w-6 text-center text-sm">
+                                        {item.quantity}
+                                      </span>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => updateCartItemQuantity(actualIndex, 1)}
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <span className="font-semibold text-sm text-gray-900">
+                                      £{(item.quantity * item.price).toFixed(2)}
+                                    </span>
+                                  </div>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                      <span className="font-semibold text-gray-900">
-                        £{(item.quantity * item.price).toFixed(2)}
-                      </span>
+                    );
+                  }
+                  
+                  return (
+                    <div key={orderNum} className="mb-4">
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">{categoryName}</h3>
+                      <div className="space-y-2">
+                        {groupedItems[orderNum].map((item, index) => {
+                          const actualIndex = cart.indexOf(item);
+                          return (
+                            <Card key={actualIndex} data-testid={`cart-item-${actualIndex}`} className="p-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                                  {item.notes && <p className="text-sm text-gray-500 italic mt-1">{item.notes}</p>}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeCartItem(actualIndex)}
+                                  data-testid={`remove-item-${actualIndex}`}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => updateCartItemQuantity(actualIndex, -1)}
+                                    data-testid={`decrease-cart-item-${actualIndex}`}
+                                  >
+                                    <Minus className="w-3 h-3" />
+                                  </Button>
+                                  <span className="font-semibold w-8 text-center" data-testid={`cart-item-quantity-${actualIndex}`}>
+                                    {item.quantity}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => updateCartItemQuantity(actualIndex, 1)}
+                                    data-testid={`increase-cart-item-${actualIndex}`}
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                                <span className="font-semibold text-gray-900">
+                                  £{(item.quantity * item.price).toFixed(2)}
+                                </span>
+                              </div>
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </Card>
-                ))}
+                  );
+                })}
               </div>
             )}
           </ScrollArea>
@@ -471,11 +713,11 @@ export default function OrderScreen() {
               </Button>
               <Button
                 onClick={handleCompleteOrder}
-                disabled={!orderId}
+                disabled={cart.length === 0}
                 data-testid="complete-order-button"
                 className="bg-green-500 hover:bg-green-600"
               >
-                <Receipt className="w-4 h-4 mr-2" />
+                <CheckCircle2 className="w-4 h-4 mr-2" />
                 Complete
               </Button>
             </div>
