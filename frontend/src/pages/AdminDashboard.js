@@ -306,17 +306,29 @@ export default function AdminDashboard() {
           {/* Manage Prices Tab */}
           <TabsContent value="prices">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Menu Price Management</h2>
-              <Tabs defaultValue={categories[0]} className="w-full">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Menu Management</h2>
+                <div className="flex gap-2">
+                  <Button onClick={() => setShowAddCategoryDialog(true)} variant="outline" className="border-red-200">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Category
+                  </Button>
+                  <Button onClick={() => setShowAddItemDialog(true)} className="bg-red-500 hover:bg-red-600">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+              </div>
+              <Tabs defaultValue={menuCategories[0]} className="w-full">
                 <TabsList className="flex-wrap h-auto bg-gray-50 p-2 gap-2">
-                  {categories.map((category) => (
+                  {menuCategories.map((category) => (
                     <TabsTrigger key={category} value={category}>
                       {category}
                     </TabsTrigger>
                   ))}
                 </TabsList>
 
-                {categories.map((category) => (
+                {menuCategories.map((category) => (
                   <TabsContent key={category} value={category}>
                     <ScrollArea className="h-[500px] pr-4">
                       <div className="space-y-2">
