@@ -56,7 +56,7 @@ export default function OrderScreen() {
   const { tableNumber } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { peopleCount } = location.state || { peopleCount: 1 };
+  const { peopleCount, existingOrderId } = location.state || { peopleCount: 1, existingOrderId: null };
 
   const [menu, setMenu] = useState([]);
   const [cart, setCart] = useState([]);
