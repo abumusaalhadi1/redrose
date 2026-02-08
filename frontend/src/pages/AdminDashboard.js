@@ -555,6 +555,63 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+
+          {/* Reservations Tab */}
+          <TabsContent value="reservations">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Table Reservations</h2>
+                <Button 
+                  onClick={() => setShowAddReservationDialog(true)}
+                  className="bg-red-500 hover:bg-red-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Reservation
+                </Button>
+              </div>
+              <ScrollArea className="h-[500px] pr-4">
+                <div className="space-y-3">
+                  {reservations.map((reservation) => (
+                    <Card key={reservation.id} className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-semibold">Table {reservation.table_number}</h4>
+                            <Badge className="bg-blue-500">{new Date(reservation.reservation_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</Badge>
+                          </div>
+                          <p className="text-sm font-medium text-gray-900">{reservation.customer_name}</p>
+                          {reservation.phone && (
+                            <p className="text-sm text-gray-600">{reservation.phone}</p>
+                          )}
+                          <p className="text-sm text-gray-600">{reservation.people_count} people</p>
+                          {reservation.notes && (
+                            <p className="text-sm text-gray-500 italic mt-2">{reservation.notes}</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-2">
+                            {new Date(reservation.reservation_time).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelReservation(reservation.id)}
+                          className="border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                  {reservations.length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                      No active reservations
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </Card>
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6">
