@@ -1,0 +1,70 @@
+RED ROSE RESTAURANT POS - SOURCE CODE PACKAGE
+==============================================
+
+📦 Package Contents:
+- Complete Backend (FastAPI + Python)
+- Complete Frontend (React + PWA)
+- All configuration files
+- README with setup instructions
+
+📂 File Structure:
+/backend/
+  - server.py (Main FastAPI application)
+  - requirements.txt (Python dependencies)
+  - .env (Environment configuration)
+
+/frontend/
+  - src/ (React source code)
+    - pages/ (TableSelection, OrderScreen, AdminDashboard)
+    - components/ui/ (Shadcn UI components)
+    - App.js, App.css, index.css
+  - public/ (Static assets + PWA manifest)
+  - package.json (Node.js dependencies)
+  - .env (Frontend environment)
+
+🚀 Setup Instructions:
+====================
+
+1. BACKEND SETUP:
+   cd backend
+   pip install -r requirements.txt
+   python server.py
+
+2. FRONTEND SETUP:
+   cd frontend
+   yarn install
+   yarn start
+
+3. MONGODB:
+   - Ensure MongoDB is running
+   - Update MONGO_URL in backend/.env if needed
+
+4. INITIALIZE MENU:
+   curl -X POST http://localhost:8001/api/menu/init
+
+5. ACCESS APP:
+   http://localhost:3000
+
+📱 PWA Installation:
+- Open in Chrome on Android
+- Menu → Add to Home Screen
+- App installs like native app
+
+🖨️ Printer Setup:
+- Go to Admin → Settings
+- Update printer IP address
+- Default: 192.168.1.146:9100
+
+💡 Key Features:
+- 276 menu items across 15 categories
+- Active table tracking
+- Reservation system
+- Order modification
+- Kitchen & bill printing (ESC/POS)
+- Split bill calculator
+- Daily sales analytics
+- Full menu management
+
+📧 Support:
+Contact your system administrator for deployment assistance.
+
