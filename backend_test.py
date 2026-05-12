@@ -7,8 +7,8 @@ from datetime import datetime
 
 class RedRoseAPITester:
     def __init__(self):
-        # Use the public backend URL from frontend .env
-        self.base_url = "https://tadka-app.preview.emergentagent.com/api"
+        # Use the local backend server by default.
+        self.base_url = "http://127.0.0.1:8001/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.test_order_id = None
